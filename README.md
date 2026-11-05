@@ -40,9 +40,7 @@ GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 GEMINI_MODEL=YOUR_GEMINI_MODEL
 
 
-I'll share the actual configuration values privately.
 
-Please don't upload this .env file to GitHub.
 
 ### STEP 4: Run the project locally
 
