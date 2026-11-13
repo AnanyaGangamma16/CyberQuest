@@ -45,23 +45,23 @@ router.post("/", authenticate, async (req, res) => {
 
   if (!process.env.GEMINI_API_KEY) {
     return res.status(503).json({
-      message: "AI assistant is not configured. Add GEMINI_API_KEY to server .env."
+      message: "AI assistant is not configured."
     });
   }
 
+  const model =
+    process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+
+  console.log("Gemini model currently used:", model);
+
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 30000);
+
   try {
-    const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
-
-console.log("Gemini model currently used:", model);
-
-    const controller = new AbortController();
-
-const timeout = setTimeout(() => {
-  controller.abort();
-}, 30000);
-
-const response = await fetch(
-  signal: controller.signal,
+    const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/interactions",
       {
         method: "POST",
@@ -69,14 +69,14 @@ const response = await fetch(
           "Content-Type": "application/json",
           "x-goog-api-key": process.env.GEMINI_API_KEY
         },
+        signal: controller.signal,
         body: JSON.stringify({
-  model: model,
-  input: message,
-  store: false,
-
-  generation_config: {
-    thinking_level: "low"
-  },
+          model: model,
+          input: message,
+          store: false,
+          generation_config: {
+            thinking_level: "low"
+          },
           system_instruction:
             "You are CyberQuest's cybersecurity education assistant. Explain concepts in beginner-friendly language. When reviewing suspicious messages, identify warning signs and safe next steps. Never claim a link is definitely safe or malicious based only on text. Never ask for passwords, OTPs, bank details, or private credentials. Do not provide instructions for hacking, malware deployment, credential theft, or evasion. Keep answers concise and practical."
         })
@@ -84,7 +84,6 @@ const response = await fetch(
     );
 
     const data = await response.json();
-    clearTimeout(timeout);
 
     if (!response.ok) {
       const detail =
@@ -115,15 +114,19 @@ const response = await fetch(
 
   } catch (error) {
     console.error("Assistant Error:", error.message);
-      if (error.name === "AbortError") {
-    return res.status(504).json({
-      message: "Gemini is taking too long. Please try again."
-    });
-  }
+
+    if (error.name === "AbortError") {
+      return res.status(504).json({
+        message: "Gemini is taking too long. Please try again."
+      });
+    }
 
     return res.status(500).json({
       message: "Could not contact the AI assistant"
     });
+
+  } finally {
+    clearTimeout(timeout);
   }
 });
 
