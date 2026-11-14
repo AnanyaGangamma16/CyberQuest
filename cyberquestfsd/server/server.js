@@ -27,6 +27,14 @@ app.get("/", (req, res) => {
   res.send("CyberQuest Backend is Running!");
 });
 
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "CyberQuest server is running"
+  });
+});
+
 // Handle unknown API routes
 app.use("/api", (req, res) => {
   res.status(404).json({
@@ -35,17 +43,20 @@ app.use("/api", (req, res) => {
   });
 });
 
-// MongoDB connection and server startup
+// Start server independently of MongoDB
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`CyberQuest server running on port ${PORT}`);
+});
+
+// Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 10000
+  })
   .then(() => {
     console.log("MongoDB Connected Successfully!");
-
-    const PORT = process.env.PORT || 5000;
-
-    app.listen(PORT, () => {
-      console.log(`CyberQuest server running on port ${PORT}`);
-    });
   })
   .catch((error) => {
     console.error("MongoDB Connection Failed:", error.message);
