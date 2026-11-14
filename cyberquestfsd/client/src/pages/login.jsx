@@ -18,15 +18,13 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/login`        {
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/login`,
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            email,
-            password
-          })
+          body: JSON.stringify({ email, password })
         }
       );
 
@@ -36,7 +34,6 @@ function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Store login details for the current application session
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -94,11 +91,7 @@ function Login() {
             </button>
           </div>
 
-          <button
-            className="auth-submit"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="auth-submit" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
@@ -107,10 +100,7 @@ function Login() {
           Don't have an account? <Link to="/register">Register</Link>
         </p>
 
-        <button
-          className="back-home"
-          onClick={() => navigate("/")}
-        >
+        <button className="back-home" onClick={() => navigate("/")}>
           Back to Home
         </button>
       </div>
